@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Défi des Nationalités</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Uso de una fuente altamente legible diseñada para accesibilidad */
+        body {
+            font-family: 'Atkinson Hyperlegible', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Enfoque de alto contraste para navegación por teclado (DUA) */
+        button:focus-visible {
+            outline: 4px solid #2563eb;
+            outline-offset: 4px;
+        }
+    </style>
+</head>
+<body class="text-slate-900 min-h-screen flex flex-col">
+
+    <header class="bg-white border-b-4 border-slate-800 sticky top-0 z-50">
+        <div class="max-w-2xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl" aria-hidden="true">🌍</span>
+                <h1 class="text-xl md:text-2xl font-bold tracking-wide">Le Défi des Nationalités</h1>
+            </div>
+            <div class="bg-slate-800 text-white px-5 py-2 rounded-lg font-bold text-lg shadow-sm border-2 border-slate-800" aria-live="polite">
+                Score: <span id="score-display">0</span> / 5
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-2xl mx-auto w-full px-4 py-8 flex flex-col items-center">
+        
+        <!-- Contenedor del Juego -->
+        <div id="game-container" class="w-full w-full">
+            
+            <div class="mb-6 flex justify-between items-center w-full text-slate-600 font-bold">
+                <span id="question-counter">Question 1 sur 5</span>
+                <div class="flex gap-1" id="progress-dots">
+                    <!-- Los puntos de progreso se generan por JS -->
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border-4 border-slate-800 shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] p-6 md:p-8 mb-8 w-full transition-all">
+                <div class="text-center mb-8">
+                    <div id="character-emoji" class="text-6xl mb-4" aria-hidden="true">👩🏻‍🎨</div>
+                    <h2 id="question-text" class="text-2xl md:text-3xl font-bold leading-snug">
+                        Marie vient de France.<br>Elle est...
+                    </h2>
+                </div>
+
+                <div id="options-container" class="flex flex-col gap-4">
+                    <!-- Los botones se inyectan por JS -->
+                </div>
+            </div>
+
+            <div id="feedback-container" class="hidden rounded-xl border-4 p-5 mb-6 fade-in text-lg font-bold">
+                <div class="flex items-start gap-3">
+                    <span id="feedback-icon" class="text-2xl mt-1"></span>
+                    <div>
+                        <p id="feedback-title" class="text-xl mb-1"></p>
+                        <p id="feedback-message" class="text-slate-800 font-normal text-base md:text-lg"></p>
+                    </div>
+                </div>
+            </div>
+
+            <button id="next-btn" onclick="nextQuestion()" class="hidden w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xl rounded-xl border-4 border-slate-800 shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] active:translate-y-1 active:shadow-none transition-all">
+                Suivant ➔
+            </button>
+        </div>
+
+        <div id="result-container" class="hidden w-full bg-white rounded-2xl border-4 border-slate-800 shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] p-8 text-center fade-in">
+            <div class="text-6xl mb-4">🏆</div>
+            <h2 class="text-3xl font-bold mb-4">Félicitations !</h2>
+            <p class="text-xl mb-6">Tu as obtenu <span id="final-score" class="font-bold text-blue-600 text-2xl"></span> points sur 5.</p>
+            
+            <div id="final-feedback" class="mb-8 p-4 bg-slate-100 rounded-lg text-left text-lg">
+                <h3 class="font-bold mb-2">Recuerda la regla básica:</h3>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li>El <strong>masculino</strong> suele ser la forma base (ej: <em>Français</em>).</li>
+                    <li>Para el <strong>femenino</strong>, normalmente se añade una <strong>-e</strong> al final, lo que a veces cambia la pronunciación (ej: <em>Française</em>).</li>
+                </ul>
+            </div>
+
+            <button onclick="initGame()" class="w-full md:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xl rounded-xl border-4 border-slate-800 shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] active:translate-y-1 active:shadow-none transition-all">
+                Rejouer (Volver a jugar)
+            </button>
+        </div>
+
+    </main>
+
+    <script>
+        const questions = [
+            {
+                emoji: "👩🏻",
+                text: "Marie vient de France.<br>Elle est...",
+                options: [
+                    { text: "Français", isCorrect: false },
+                    { text: "Française", isCorrect: true },
+                    { text: "Francés", isCorrect: false }
+                ],
+                explanation: "<strong>Française</strong> es femenino porque Marie es mujer (Elle). Se añade una <strong>-e</strong> a la forma masculina (Français)."
+            },
+            {
+                emoji: "👨🏽",
+                text: "Paul vient du Canada.<br>Il est...",
+                options: [
+                    { text: "Canadien", isCorrect: true },
+                    { text: "Canadienne", isCorrect: false },
+                    { text: "Canadiense", isCorrect: false }
+                ],
+                explanation: "<strong>Canadien</strong> es la forma masculina para Paul (Il). El femenino dobla la 'n' y añade 'e' (Canadienne)."
+            },
+            {
+                emoji: "👩🏽‍🦱",
+                text: "Carmen vient d'Espagne.<br>Elle est...",
+                options: [
+                    { text: "Espagnol", isCorrect: false },
+                    { text: "Espagnoles", isCorrect: false },
+                    { text: "Espagnole", isCorrect: true }
+                ],
+                explanation: "<strong>Espagnole</strong> es singular y femenino. Se forma añadiendo una <strong>-e</strong> al masculino (Espagnol)."
+            },
+            {
+                emoji: "👨🏾",
+                text: "Ali vient du Maroc.<br>Il est...",
+                options: [
+                    { text: "Marocaine", isCorrect: false },
+                    { text: "Marocain", isCorrect: true },
+                    { text: "Marroquí", isCorrect: false }
+                ],
+                explanation: "<strong>Marocain</strong> es masculino. Al ser un chico (Il), usamos la forma base sin la '-e' final."
+            },
+            {
+                emoji: "👩🏻",
+                text: "Yuki vient du Japon.<br>Elle est...",
+                options: [
+                    { text: "Japonaise", isCorrect: true },
+                    { text: "Japonais", isCorrect: false },
+                    { text: "Japon", isCorrect: false }
+                ],
+                explanation: "<strong>Japonaise</strong> es correcto. Al ser mujer (Elle), a la nacionalidad masculina (Japonais) se le añade una <strong>-e</strong>."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let hasAnswered = false;
+
+        const ui = {
+            scoreDisplay: document.getElementById('score-display'),
+            questionCounter: document.getElementById('question-counter'),
+            progressDots: document.getElementById('progress-dots'),
+            characterEmoji: document.getElementById('character-emoji'),
+            questionText: document.getElementById('question-text'),
+            optionsContainer: document.getElementById('options-container'),
+            feedbackContainer: document.getElementById('feedback-container'),
+            feedbackIcon: document.getElementById('feedback-icon'),
+            feedbackTitle: document.getElementById('feedback-title'),
+            feedbackMessage: document.getElementById('feedback-message'),
+            nextBtn: document.getElementById('next-btn'),
+            gameContainer: document.getElementById('game-container'),
+            resultContainer: document.getElementById('result-container'),
+            finalScore: document.getElementById('final-score')
+        };
+
+        function initGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            ui.scoreDisplay.textContent = score;
+            
+            ui.resultContainer.classList.add('hidden');
+            ui.gameContainer.classList.remove('hidden');
+            
+            renderProgress();
+            renderQuestion();
+        }
+
+        function renderProgress() {
+            ui.progressDots.innerHTML = '';
+            for (let i = 0; i < questions.length; i++) {
+                const dot = document.createElement('div');
+                dot.className = `w-3 h-3 rounded-full border-2 border-slate-800 ${i === currentQuestionIndex ? 'bg-blue-600' : (i < currentQuestionIndex ? 'bg-emerald-500' : 'bg-white')}`;
+                ui.progressDots.appendChild(dot);
+            }
+        }
+
+        function renderQuestion() {
+            hasAnswered = false;
+            const q = questions[currentQuestionIndex];
+            
+            ui.questionCounter.textContent = `Question ${currentQuestionIndex + 1} sur ${questions.length}`;
+            ui.characterEmoji.textContent = q.emoji;
+            ui.questionText.innerHTML = q.text;
+            
+            ui.feedbackContainer.classList.add('hidden');
+            ui.nextBtn.classList.add('hidden');
+            
+            ui.optionsContainer.innerHTML = '';
+            
+            // Randomizar opciones
+            const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+            
+            shuffledOptions.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-4 md:p-5 rounded-xl border-4 border-slate-800 bg-white hover:bg-slate-50 text-xl font-bold shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] active:translate-y-1 active:shadow-none transition-all flex items-center justify-between';
+                btn.innerHTML = `
+                    <span>${opt.text}</span>
+                    <span class="status-icon hidden text-2xl"></span>
+                `;
+                btn.onclick = () => handleAnswer(opt, btn, shuffledOptions);
+                ui.optionsContainer.appendChild(btn);
+            });
+
+            renderProgress();
+        }
+
+        function handleAnswer(selectedOption, buttonElement, allOptions) {
+            if (hasAnswered) return;
+            hasAnswered = true;
+
+            const q = questions[currentQuestionIndex];
+            const buttons = ui.optionsContainer.querySelectorAll('button');
+
+            // Evaluar respuesta
+            if (selectedOption.isCorrect) {
+                score++;
+                ui.scoreDisplay.textContent = score;
+                // Feedback visual de éxito en el marcador
+                ui.scoreDisplay.parentElement.classList.add('bg-emerald-600', 'border-emerald-800');
+                ui.scoreDisplay.parentElement.classList.remove('bg-slate-800', 'border-slate-800');
+                setTimeout(() => {
+                    ui.scoreDisplay.parentElement.classList.remove('bg-emerald-600', 'border-emerald-800');
+                    ui.scoreDisplay.parentElement.classList.add('bg-slate-800', 'border-slate-800');
+                }, 500);
+
+                setupFeedback(true, q.explanation);
+            } else {
+                setupFeedback(false, q.explanation);
+            }
+
+            // Actualizar botones (mostrar correctos/incorrectos y deshabilitar)
+            buttons.forEach((btn, index) => {
+                const isThisCorrect = allOptions[index].isCorrect;
+                const icon = btn.querySelector('.status-icon');
+                icon.classList.remove('hidden');
+
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-slate-50', 'active:translate-y-1', 'active:shadow-none');
+                
+                if (isThisCorrect) {
+                    btn.classList.add('bg-emerald-100', 'border-emerald-600');
+                    icon.textContent = '✅';
+                } else if (btn === buttonElement) {
+                    // El que hemos pulsado y era incorrecto
+                    btn.classList.add('bg-rose-100', 'border-rose-600');
+                    icon.textContent = '❌';
+                } else {
+                    // Los demás incorrectos no pulsados
+                    btn.classList.add('opacity-50', 'bg-slate-50');
+                }
+            });
+
+            ui.nextBtn.classList.remove('hidden');
+            ui.nextBtn.classList.add('fade-in');
+            
+            // Auto-scroll en móviles para asegurar que se ve el botón de siguiente
+            setTimeout(() => {
+                ui.nextBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        function setupFeedback(isCorrect, message) {
+            ui.feedbackContainer.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-500', 'text-emerald-900', 'bg-rose-50', 'border-rose-500', 'text-rose-900');
+            
+            if (isCorrect) {
+                ui.feedbackContainer.classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-900');
+                ui.feedbackIcon.textContent = '👏';
+                ui.feedbackTitle.textContent = 'Très bien ! (¡Correcto!)';
+                ui.feedbackTitle.className = 'text-xl font-bold text-emerald-700';
+            } else {
+                ui.feedbackContainer.classList.add('bg-rose-50', 'border-rose-500', 'text-rose-900');
+                ui.feedbackIcon.textContent = '💡';
+                ui.feedbackTitle.textContent = 'Attention ! (Incorrecto)';
+                ui.feedbackTitle.className = 'text-xl font-bold text-rose-700';
+            }
+            
+            ui.feedbackMessage.innerHTML = message;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            ui.gameContainer.classList.add('hidden');
+            ui.resultContainer.classList.remove('hidden');
+            ui.finalScore.textContent = score;
+        }
+
+        // Iniciar el juego al cargar la página
+        window.onload = initGame;
+    </script>
+</body>
+</html>
