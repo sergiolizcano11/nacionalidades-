@@ -1,324 +1,266 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Le Défi des Nationalités</title>
+    <title>The Nationalities Challenge</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Uso de una fuente altamente legible diseñada para accesibilidad */
-        body {
-            font-family: 'Atkinson Hyperlegible', sans-serif;
-            background-color: #f8fafc;
+        /* Estilos DUA: Alto contraste y animaciones suaves para botones 3D */
+        body { 
+            background-color: #F3F4F6; 
+            color: #0F172A; 
+            font-family: system-ui, -apple-system, sans-serif;
         }
-        
+        .btn-dua {
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .btn-dua:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: none !important;
+        }
         .fade-in {
-            animation: fadeIn 0.4s ease-in-out forwards;
+            animation: fadeIn 0.4s ease-in-out;
         }
-        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
-        /* Enfoque de alto contraste para navegación por teclado (DUA) */
-        button:focus-visible {
-            outline: 4px solid #2563eb;
-            outline-offset: 4px;
-        }
     </style>
 </head>
-<body class="text-slate-900 min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-    <header class="bg-white border-b-4 border-slate-800 sticky top-0 z-50">
-        <div class="max-w-2xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <span class="text-3xl" aria-hidden="true">🌍</span>
-                <h1 class="text-xl md:text-2xl font-bold tracking-wide">Le Défi des Nationalités</h1>
-            </div>
-            <div class="bg-slate-800 text-white px-5 py-2 rounded-lg font-bold text-lg shadow-sm border-2 border-slate-800" aria-live="polite">
-                Score: <span id="score-display">0</span> / 5
-            </div>
-        </div>
-    </header>
-
-    <main class="flex-grow max-w-2xl mx-auto w-full px-4 py-8 flex flex-col items-center">
+    <!-- Contenedor Principal -->
+    <main class="w-full max-w-2xl bg-white rounded-2xl shadow-2xl p-6 md:p-10 border-4 border-slate-800">
         
-        <!-- Contenedor del Juego -->
-        <div id="game-container" class="w-full w-full">
-            
-            <div class="mb-6 flex justify-between items-center w-full text-slate-600 font-bold">
-                <span id="question-counter">Question 1 sur 5</span>
-                <div class="flex gap-1" id="progress-dots">
-                    <!-- Los puntos de progreso se generan por JS -->
-                </div>
+        <!-- Pantalla de Inicio -->
+        <section id="start-screen" class="text-center fade-in">
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-6 text-slate-900 leading-tight">
+                🌍 The Nationalities Challenge
+            </h1>
+            <p class="text-2xl mb-8 font-medium">
+                Completa las frases con la nacionalidad correcta en inglés.
+            </p>
+            <div class="flex justify-center bg-blue-50 border-2 border-blue-800 rounded-xl p-4 mb-8">
+                <p class="text-xl font-bold flex items-center gap-3 text-left">
+                    <span>💡</span> Presta atención: ¿Es el nombre del país o la nacionalidad?
+                </p>
             </div>
-
-            <div class="bg-white rounded-2xl border-4 border-slate-800 shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] p-6 md:p-8 mb-8 w-full transition-all">
-                <div class="text-center mb-8">
-                    <div id="character-emoji" class="text-6xl mb-4" aria-hidden="true">👩🏻‍🎨</div>
-                    <h2 id="question-text" class="text-2xl md:text-3xl font-bold leading-snug">
-                        Marie vient de France.<br>Elle est...
-                    </h2>
-                </div>
-
-                <div id="options-container" class="flex flex-col gap-4">
-                    <!-- Los botones se inyectan por JS -->
-                </div>
-            </div>
-
-            <div id="feedback-container" class="hidden rounded-xl border-4 p-5 mb-6 fade-in text-lg font-bold">
-                <div class="flex items-start gap-3">
-                    <span id="feedback-icon" class="text-2xl mt-1"></span>
-                    <div>
-                        <p id="feedback-title" class="text-xl mb-1"></p>
-                        <p id="feedback-message" class="text-slate-800 font-normal text-base md:text-lg"></p>
-                    </div>
-                </div>
-            </div>
-
-            <button id="next-btn" onclick="nextQuestion()" class="hidden w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xl rounded-xl border-4 border-slate-800 shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] active:translate-y-1 active:shadow-none transition-all">
-                Suivant ➔
+            <button onclick="iniciarJuego()" class="btn-dua w-full bg-yellow-400 hover:bg-yellow-300 border-b-8 border-yellow-600 text-slate-900 text-3xl font-extrabold py-5 px-8 rounded-2xl flex items-center justify-center gap-4 focus:outline-none focus:ring-4 focus:ring-slate-900">
+                <span>▶️</span> COMENZAR
             </button>
-        </div>
+        </section>
 
-        <div id="result-container" class="hidden w-full bg-white rounded-2xl border-4 border-slate-800 shadow-[8px_8px_0px_0px_rgba(30,41,59,1)] p-8 text-center fade-in">
-            <div class="text-6xl mb-4">🏆</div>
-            <h2 class="text-3xl font-bold mb-4">Félicitations !</h2>
-            <p class="text-xl mb-6">Tu as obtenu <span id="final-score" class="font-bold text-blue-600 text-2xl"></span> points sur 5.</p>
-            
-            <div id="final-feedback" class="mb-8 p-4 bg-slate-100 rounded-lg text-left text-lg">
-                <h3 class="font-bold mb-2">Recuerda la regla básica:</h3>
-                <ul class="list-disc pl-5 space-y-2">
-                    <li>El <strong>masculino</strong> suele ser la forma base (ej: <em>Français</em>).</li>
-                    <li>Para el <strong>femenino</strong>, normalmente se añade una <strong>-e</strong> al final, lo que a veces cambia la pronunciación (ej: <em>Française</em>).</li>
-                </ul>
+        <!-- Pantalla de Juego (Paso a paso) -->
+        <section id="game-screen" class="hidden text-center">
+            <!-- Indicador de progreso -->
+            <div class="flex justify-between items-center mb-8 border-b-4 border-slate-200 pb-4">
+                <span class="text-2xl font-bold">Paso <span id="current-step">1</span> de <span id="total-steps">4</span></span>
+                <span class="text-2xl font-bold bg-slate-800 text-white px-4 py-1 rounded-lg">⭐ <span id="score">0</span></span>
             </div>
 
-            <button onclick="initGame()" class="w-full md:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xl rounded-xl border-4 border-slate-800 shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] active:translate-y-1 active:shadow-none transition-all">
-                Rejouer (Volver a jugar)
+            <!-- Pregunta actual -->
+            <div id="question-container" class="fade-in mb-8">
+                <p id="question-context" class="text-3xl font-semibold mb-2"></p>
+                <p id="question-text" class="text-4xl font-extrabold text-blue-900 mb-8 bg-blue-100 p-6 rounded-xl border-4 border-blue-900"></p>
+                
+                <!-- Opciones -->
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Los botones se generan desde JS -->
+                </div>
+            </div>
+
+            <!-- Feedback Visual (Correcto/Incorrecto) -->
+            <div id="feedback-container" class="hidden rounded-xl p-6 mb-6 border-4">
+                <p id="feedback-text" class="text-3xl font-extrabold flex items-center justify-center gap-4"></p>
+            </div>
+
+            <!-- Botón Siguiente -->
+            <button id="next-btn" onclick="siguientePregunta()" class="hidden btn-dua w-full bg-slate-800 hover:bg-slate-700 border-b-8 border-slate-900 text-white text-3xl font-bold py-4 px-8 rounded-2xl flex items-center justify-center gap-4 focus:outline-none focus:ring-4 focus:ring-slate-400">
+                <span>Siguiente Paso</span> <span>⏭️</span>
             </button>
-        </div>
+        </section>
+
+        <!-- Pantalla de Resultados -->
+        <section id="result-screen" class="hidden text-center fade-in">
+            <h2 class="text-5xl font-extrabold mb-6 text-slate-900">🏁 ¡Terminado!</h2>
+            <p class="text-3xl mb-8">Has conseguido:</p>
+            <div class="inline-block bg-yellow-400 border-4 border-slate-900 rounded-full w-40 h-40 flex items-center justify-center mx-auto mb-8 shadow-lg">
+                <span class="text-6xl font-black text-slate-900" id="final-score">0</span>
+            </div>
+            <p class="text-2xl font-bold mb-8" id="final-message"></p>
+            
+            <button onclick="reiniciarJuego()" class="btn-dua w-full bg-emerald-500 hover:bg-emerald-400 border-b-8 border-emerald-700 text-slate-900 text-3xl font-extrabold py-5 px-8 rounded-2xl flex items-center justify-center gap-4 focus:outline-none focus:ring-4 focus:ring-slate-900">
+                <span>🔄</span> JUGAR OTRA VEZ
+            </button>
+        </section>
 
     </main>
 
     <script>
-        const questions = [
+        // Datos del juego adaptados al área de inglés
+        const preguntas = [
             {
-                emoji: "👩🏻",
-                text: "Marie vient de France.<br>Elle est...",
-                options: [
-                    { text: "Français", isCorrect: false },
-                    { text: "Française", isCorrect: true },
-                    { text: "Francés", isCorrect: false }
-                ],
-                explanation: "<strong>Française</strong> es femenino porque Marie es mujer (Elle). Se añade una <strong>-e</strong> a la forma masculina (Français)."
+                contexto: "👨 Pierre is from Paris.",
+                pregunta: "He is...",
+                opciones: [
+                    { texto: "French 🇫🇷", correcto: true },
+                    { texto: "France 🇫🇷", correcto: false }
+                ]
             },
             {
-                emoji: "👨🏽",
-                text: "Paul vient du Canada.<br>Il est...",
-                options: [
-                    { text: "Canadien", isCorrect: true },
-                    { text: "Canadienne", isCorrect: false },
-                    { text: "Canadiense", isCorrect: false }
-                ],
-                explanation: "<strong>Canadien</strong> es la forma masculina para Paul (Il). El femenino dobla la 'n' y añade 'e' (Canadienne)."
+                contexto: "👩 Maria is from Madrid.",
+                pregunta: "She is...",
+                opciones: [
+                    { texto: "Spain 🇪🇸", correcto: false },
+                    { texto: "Spanish 🇪🇸", correcto: true }
+                ]
             },
             {
-                emoji: "👩🏽‍🦱",
-                text: "Carmen vient d'Espagne.<br>Elle est...",
-                options: [
-                    { text: "Espagnol", isCorrect: false },
-                    { text: "Espagnoles", isCorrect: false },
-                    { text: "Espagnole", isCorrect: true }
-                ],
-                explanation: "<strong>Espagnole</strong> es singular y femenino. Se forma añadiendo una <strong>-e</strong> al masculino (Espagnol)."
+                contexto: "👨‍👦 John and Paul are from London.",
+                pregunta: "They are...",
+                opciones: [
+                    { texto: "Britain 🇬🇧", correcto: false },
+                    { texto: "British 🇬🇧", correcto: true }
+                ]
             },
             {
-                emoji: "👨🏾",
-                text: "Ali vient du Maroc.<br>Il est...",
-                options: [
-                    { text: "Marocaine", isCorrect: false },
-                    { text: "Marocain", isCorrect: true },
-                    { text: "Marroquí", isCorrect: false }
-                ],
-                explanation: "<strong>Marocain</strong> es masculino. Al ser un chico (Il), usamos la forma base sin la '-e' final."
-            },
-            {
-                emoji: "👩🏻",
-                text: "Yuki vient du Japon.<br>Elle est...",
-                options: [
-                    { text: "Japonaise", isCorrect: true },
-                    { text: "Japonais", isCorrect: false },
-                    { text: "Japon", isCorrect: false }
-                ],
-                explanation: "<strong>Japonaise</strong> es correcto. Al ser mujer (Elle), a la nacionalidad masculina (Japonais) se le añade una <strong>-e</strong>."
+                contexto: "👩 Giulia is from Rome.",
+                pregunta: "She is...",
+                opciones: [
+                    { texto: "Italian 🇮🇹", correcto: true },
+                    { texto: "Italy 🇮🇹", correcto: false }
+                ]
             }
         ];
 
-        let currentQuestionIndex = 0;
-        let score = 0;
-        let hasAnswered = false;
+        let indiceActual = 0;
+        let puntuacion = 0;
 
-        const ui = {
-            scoreDisplay: document.getElementById('score-display'),
-            questionCounter: document.getElementById('question-counter'),
-            progressDots: document.getElementById('progress-dots'),
-            characterEmoji: document.getElementById('character-emoji'),
-            questionText: document.getElementById('question-text'),
-            optionsContainer: document.getElementById('options-container'),
-            feedbackContainer: document.getElementById('feedback-container'),
-            feedbackIcon: document.getElementById('feedback-icon'),
-            feedbackTitle: document.getElementById('feedback-title'),
-            feedbackMessage: document.getElementById('feedback-message'),
-            nextBtn: document.getElementById('next-btn'),
-            gameContainer: document.getElementById('game-container'),
-            resultContainer: document.getElementById('result-container'),
-            finalScore: document.getElementById('final-score')
-        };
+        // Referencias a elementos del DOM
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const questionContext = document.getElementById('question-context');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextBtn = document.getElementById('next-btn');
+        const scoreElement = document.getElementById('score');
+        const currentStepElement = document.getElementById('current-step');
+        const totalStepsElement = document.getElementById('total-steps');
 
-        function initGame() {
-            currentQuestionIndex = 0;
-            score = 0;
-            ui.scoreDisplay.textContent = score;
-            
-            ui.resultContainer.classList.add('hidden');
-            ui.gameContainer.classList.remove('hidden');
-            
-            renderProgress();
-            renderQuestion();
+        totalStepsElement.textContent = preguntas.length;
+
+        function iniciarJuego() {
+            startScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            gameScreen.classList.add('block');
+            indiceActual = 0;
+            puntuacion = 0;
+            actualizarPuntuacion();
+            mostrarPregunta();
         }
 
-        function renderProgress() {
-            ui.progressDots.innerHTML = '';
-            for (let i = 0; i < questions.length; i++) {
-                const dot = document.createElement('div');
-                dot.className = `w-3 h-3 rounded-full border-2 border-slate-800 ${i === currentQuestionIndex ? 'bg-blue-600' : (i < currentQuestionIndex ? 'bg-emerald-500' : 'bg-white')}`;
-                ui.progressDots.appendChild(dot);
-            }
-        }
+        function mostrarPregunta() {
+            // Reiniciar estado visual
+            feedbackContainer.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            optionsContainer.innerHTML = '';
+            
+            const preguntaActual = preguntas[indiceActual];
+            currentStepElement.textContent = indiceActual + 1;
+            
+            // Cargar textos
+            questionContext.textContent = preguntaActual.contexto;
+            questionText.textContent = preguntaActual.pregunta;
 
-        function renderQuestion() {
-            hasAnswered = false;
-            const q = questions[currentQuestionIndex];
-            
-            ui.questionCounter.textContent = `Question ${currentQuestionIndex + 1} sur ${questions.length}`;
-            ui.characterEmoji.textContent = q.emoji;
-            ui.questionText.innerHTML = q.text;
-            
-            ui.feedbackContainer.classList.add('hidden');
-            ui.nextBtn.classList.add('hidden');
-            
-            ui.optionsContainer.innerHTML = '';
-            
-            // Randomizar opciones
-            const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
-            
-            shuffledOptions.forEach((opt, index) => {
+            // Crear botones de opciones
+            preguntaActual.opciones.forEach((opcion, index) => {
                 const btn = document.createElement('button');
-                btn.className = 'w-full text-left p-4 md:p-5 rounded-xl border-4 border-slate-800 bg-white hover:bg-slate-50 text-xl font-bold shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] active:translate-y-1 active:shadow-none transition-all flex items-center justify-between';
-                btn.innerHTML = `
-                    <span>${opt.text}</span>
-                    <span class="status-icon hidden text-2xl"></span>
-                `;
-                btn.onclick = () => handleAnswer(opt, btn, shuffledOptions);
-                ui.optionsContainer.appendChild(btn);
+                // Estilo DUA: Botones grandes, claros, con buen borde
+                btn.className = `btn-dua w-full bg-white border-4 border-slate-300 hover:border-slate-800 text-slate-800 text-3xl font-bold py-6 px-4 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500`;
+                btn.textContent = opcion.texto;
+                btn.onclick = () => verificarRespuesta(opcion.correcto, btn);
+                optionsContainer.appendChild(btn);
             });
 
-            renderProgress();
+            // Forzar animación
+            const qc = document.getElementById('question-container');
+            qc.classList.remove('fade-in');
+            void qc.offsetWidth; 
+            qc.classList.add('fade-in');
         }
 
-        function handleAnswer(selectedOption, buttonElement, allOptions) {
-            if (hasAnswered) return;
-            hasAnswered = true;
+        function verificarRespuesta(esCorrecto, btnSeleccionado) {
+            const botones = optionsContainer.querySelectorAll('button');
+            botones.forEach(btn => btn.disabled = true);
 
-            const q = questions[currentQuestionIndex];
-            const buttons = ui.optionsContainer.querySelectorAll('button');
-
-            // Evaluar respuesta
-            if (selectedOption.isCorrect) {
-                score++;
-                ui.scoreDisplay.textContent = score;
-                // Feedback visual de éxito en el marcador
-                ui.scoreDisplay.parentElement.classList.add('bg-emerald-600', 'border-emerald-800');
-                ui.scoreDisplay.parentElement.classList.remove('bg-slate-800', 'border-slate-800');
-                setTimeout(() => {
-                    ui.scoreDisplay.parentElement.classList.remove('bg-emerald-600', 'border-emerald-800');
-                    ui.scoreDisplay.parentElement.classList.add('bg-slate-800', 'border-slate-800');
-                }, 500);
-
-                setupFeedback(true, q.explanation);
-            } else {
-                setupFeedback(false, q.explanation);
-            }
-
-            // Actualizar botones (mostrar correctos/incorrectos y deshabilitar)
-            buttons.forEach((btn, index) => {
-                const isThisCorrect = allOptions[index].isCorrect;
-                const icon = btn.querySelector('.status-icon');
-                icon.classList.remove('hidden');
-
-                btn.disabled = true;
-                btn.classList.remove('hover:bg-slate-50', 'active:translate-y-1', 'active:shadow-none');
+            feedbackContainer.classList.remove('hidden');
+            feedbackContainer.classList.add('fade-in');
+            
+            if (esCorrecto) {
+                puntuacion += 10;
+                actualizarPuntuacion();
+                // DUA: Refuerzo positivo claro con color y forma/icono
+                btnSeleccionado.classList.replace('border-slate-300', 'border-emerald-600');
+                btnSeleccionado.classList.replace('hover:border-slate-800', 'bg-emerald-100');
                 
-                if (isThisCorrect) {
-                    btn.classList.add('bg-emerald-100', 'border-emerald-600');
-                    icon.textContent = '✅';
-                } else if (btn === buttonElement) {
-                    // El que hemos pulsado y era incorrecto
-                    btn.classList.add('bg-rose-100', 'border-rose-600');
-                    icon.textContent = '❌';
-                } else {
-                    // Los demás incorrectos no pulsados
-                    btn.classList.add('opacity-50', 'bg-slate-50');
-                }
-            });
-
-            ui.nextBtn.classList.remove('hidden');
-            ui.nextBtn.classList.add('fade-in');
-            
-            // Auto-scroll en móviles para asegurar que se ve el botón de siguiente
-            setTimeout(() => {
-                ui.nextBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }, 100);
-        }
-
-        function setupFeedback(isCorrect, message) {
-            ui.feedbackContainer.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-500', 'text-emerald-900', 'bg-rose-50', 'border-rose-500', 'text-rose-900');
-            
-            if (isCorrect) {
-                ui.feedbackContainer.classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-900');
-                ui.feedbackIcon.textContent = '👏';
-                ui.feedbackTitle.textContent = 'Très bien ! (¡Correcto!)';
-                ui.feedbackTitle.className = 'text-xl font-bold text-emerald-700';
+                feedbackContainer.className = 'rounded-xl p-6 mb-6 border-4 border-emerald-600 bg-emerald-50 fade-in';
+                feedbackText.className = 'text-3xl font-extrabold flex items-center justify-center gap-4 text-emerald-800';
+                feedbackText.innerHTML = '<span>✅</span> ¡Excelente! That is correct.';
             } else {
-                ui.feedbackContainer.classList.add('bg-rose-50', 'border-rose-500', 'text-rose-900');
-                ui.feedbackIcon.textContent = '💡';
-                ui.feedbackTitle.textContent = 'Attention ! (Incorrecto)';
-                ui.feedbackTitle.className = 'text-xl font-bold text-rose-700';
+                // DUA: Corrección clara sin ser agresiva
+                btnSeleccionado.classList.replace('border-slate-300', 'border-red-600');
+                btnSeleccionado.classList.replace('hover:border-slate-800', 'bg-red-100');
+                
+                feedbackContainer.className = 'rounded-xl p-6 mb-6 border-4 border-red-600 bg-red-50 fade-in';
+                feedbackText.className = 'text-3xl font-extrabold flex items-center justify-center gap-4 text-red-800';
+                feedbackText.innerHTML = '<span>❌</span> ¡Cuidado! Recuerda elegir la nacionalidad.';
             }
-            
-            ui.feedbackMessage.innerHTML = message;
+
+            nextBtn.classList.remove('hidden');
+            nextBtn.classList.add('fade-in');
         }
 
-        function nextQuestion() {
-            currentQuestionIndex++;
-            if (currentQuestionIndex < questions.length) {
-                renderQuestion();
+        function siguientePregunta() {
+            indiceActual++;
+            if (indiceActual < preguntas.length) {
+                mostrarPregunta();
             } else {
-                showResults();
+                mostrarResultados();
             }
         }
 
-        function showResults() {
-            ui.gameContainer.classList.add('hidden');
-            ui.resultContainer.classList.remove('hidden');
-            ui.finalScore.textContent = score;
+        function mostrarResultados() {
+            gameScreen.classList.add('hidden');
+            gameScreen.classList.remove('block');
+            resultScreen.classList.remove('hidden');
+            resultScreen.classList.add('block');
+            
+            document.getElementById('final-score').textContent = puntuacion;
+            
+            const mensajeFinal = document.getElementById('final-message');
+            if (puntuacion === 40) {
+                mensajeFinal.textContent = "🏆 ¡Perfect! Eres un experto en nacionalidades.";
+            } else if (puntuacion >= 20) {
+                mensajeFinal.textContent = "👍 ¡Very good! Buen esfuerzo, sigue practicando.";
+            } else {
+                mensajeFinal.textContent = "💪 ¡Don't give up! Repasa las reglas y vuelve a intentarlo.";
+            }
         }
 
-        // Iniciar el juego al cargar la página
-        window.onload = initGame;
+        function reiniciarJuego() {
+            resultScreen.classList.add('hidden');
+            resultScreen.classList.remove('block');
+            iniciarJuego();
+        }
+        
+        function actualizarPuntuacion() {
+            scoreElement.textContent = puntuacion;
+        }
     </script>
 </body>
 </html>
